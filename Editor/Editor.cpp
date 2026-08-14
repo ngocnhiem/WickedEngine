@@ -3838,11 +3838,11 @@ void EditorComponent::Render() const
 
 			if (dummy_male)
 			{
-				dummy::draw_male(XMMatrixTranslation(dummy_pos.x, dummy_pos.y, dummy_pos.z) * VP, XMFLOAT4(1, 1, 1, 1), false, cmd);
+				dummy::draw_male(XMMatrixTranslation(dummy_pos.x, dummy_pos.y, dummy_pos.z), VP, XMFLOAT4(1, 1, 1, 1), false, cmd, camera.frustum);
 			}
 			else
 			{
-				dummy::draw_female(XMMatrixTranslation(dummy_pos.x, dummy_pos.y, dummy_pos.z)* VP, XMFLOAT4(1, 1, 1, 1), false, cmd);
+				dummy::draw_female(XMMatrixTranslation(dummy_pos.x, dummy_pos.y, dummy_pos.z), VP, XMFLOAT4(1, 1, 1, 1), false, cmd, camera.frustum);
 			}
 
 			device->RenderPassEnd(cmd);
@@ -3906,46 +3906,46 @@ void EditorComponent::Render() const
 					fp.position.y += 1;
 					fp.color = wi::Color::fromFloat4(XMFLOAT4(1, 0.2f, 0.5f, 1));
 					wi::font::Draw("Waypoint", fp, cmd);
-					dummy::draw_waypoint(XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_waypoint(XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::Enemy:
 					fp.position.y += 2;
 					fp.color = wi::Color::fromFloat4(XMFLOAT4(0.8f, 0.2f, 0.2f, 1));
 					wi::font::Draw("Enemy", fp, cmd);
-					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
-					dummy::draw_soldier(XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
+					dummy::draw_soldier(XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::Player:
 					fp.position.y += 2;
 					fp.color = wi::Color::fromFloat4(XMFLOAT4(0.2f, 0.8f, 0.6f, 1));
 					wi::font::Draw("Player", fp, cmd);
-					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
-					dummy::draw_male(XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
+					dummy::draw_male(XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::NPC:
 					fp.position.y += 1.8f;
 					fp.color = wi::Color::fromFloat4(XMFLOAT4(0.2f, 0.6f, 0.8f, 1));
 					wi::font::Draw("NPC", fp, cmd);
-					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
-					dummy::draw_female(XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_direction(XMMatrixRotationY(XM_PI) * XMMatrixTranslation(0, 0.1f, 0) * XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
+					dummy::draw_female(XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::Pickup:
 					fp.position.y += 1;
 					fp.color = wi::Color::fromFloat4(XMFLOAT4(1, 0.8f, 0.4f, 1));
 					wi::font::Draw("Pickup", fp, cmd);
-					dummy::draw_pickup(XMMatrixScaling(sca, sca, sca) * XMMatrixTranslation(0, 0.5f, 0) * XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_pickup(XMMatrixScaling(sca, sca, sca) * XMMatrixTranslation(0, 0.5f, 0) * XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::Vehicle:
 					fp.position.y += 1.6f;
 					fp.color = wi::Color(255, 133, 76, 255);
 					wi::font::Draw("Vehicle", fp, cmd);
-					dummy::draw_vehicle(XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_vehicle(XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				case MetadataComponent::Preset::PointOfInterest:
 					fp.position.y += 1.0f;
 					fp.color = wi::Color(176, 91, 255, 255);
 					wi::font::Draw("Point of interest", fp, cmd);
-					dummy::draw_poi(XMMatrixScaling(sca, sca, sca) * XMLoadFloat4x4(&transform.world) * VP, fp.color, true, cmd);
+					dummy::draw_poi(XMMatrixScaling(sca, sca, sca) * XMLoadFloat4x4(&transform.world), VP, fp.color, true, cmd, camera.frustum);
 					break;
 				}
 			}
