@@ -247,6 +247,7 @@ namespace wi::renderer
 		wi::graphics::CommandList cmd
 	);
 
+	// Rebuild or update all required acceleration structures for the frame
 	void UpdateRaytracingAccelerationStructures(const wi::scene::Scene& scene, wi::graphics::CommandList cmd);
 
 	// Binds all common constant buffers and samplers that may be used in all shaders

@@ -5717,39 +5717,18 @@ void UpdateRaytracingAccelerationStructures(const Scene& scene, CommandList cmd)
 				mesh.BLAS_state = MeshComponent::BLAS_STATE_COMPLETE;
 			}
 
-			// Rebuild (rather than refit) the grass BLAS while the camera
-			// moves: fast movement sweeps many strands across the cull boundary
-			// each frame, faster than refits can absorb, which would otherwise
-			// degrade the structure until the next periodic rebuild. Rebuilding
-			// once the camera has moved past a threshold keeps the BVH fresh
-			// during motion (every few frames when moving fast) while staying
-			// cheap when the view is settled.
-			static XMFLOAT3 blas_last_rebuild_eye = XMFLOAT3(0, 0, 0);
-			constexpr float blas_rebuild_move_threshold = 1.0f;
-			const bool motion_rebuild =
-				wi::math::Distance(scene.camera.Eye, blas_last_rebuild_eye) >
-				blas_rebuild_move_threshold;
-
-			if (motion_rebuild)
+			if (scene.hairs.GetCount() > 0)
 			{
-				blas_last_rebuild_eye = scene.camera.Eye;
-			}
-
-			for (size_t i = 0; i < scene.hairs.GetCount(); ++i)
-			{
-				const wi::HairParticleSystem& hair = scene.hairs[i];
-
-				if (hair.meshID != INVALID_ENTITY && hair.BLAS.IsValid())
+				const uint32_t hair_optimization_rebuild_index = scene.blas_optimize_offset % (uint32_t)scene.hairs.GetCount(); // allows a rotation of optimized rebuild for one hair system per frame
+				for (size_t i = 0; i < scene.hairs.GetCount(); ++i)
 				{
-					// Full rebuild when the structure is new/dirty or the
-					// camera has moved far enough to warrant refreshing BVH
-					// quality; otherwise refit in place (much cheaper) to track
-					// per-frame strand animation.
-					const bool rebuild = hair.must_rebuild_blas || motion_rebuild;
-					device->BuildRaytracingAccelerationStructure(
-						&hair.BLAS, cmd, rebuild ? nullptr : &hair.BLAS
-					);
-					hair.must_rebuild_blas = false;
+					const wi::HairParticleSystem& hair = scene.hairs[i];
+					if (hair.meshID != INVALID_ENTITY && hair.BLAS.IsValid())
+					{
+						const bool rebuild = hair.must_rebuild_blas || (hair_optimization_rebuild_index == i);
+						device->BuildRaytracingAccelerationStructure(&hair.BLAS, cmd, rebuild ? nullptr : &hair.BLAS);
+						hair.must_rebuild_blas = false;
+					}
 				}
 			}
 
@@ -5808,6 +5787,7 @@ void UpdateRaytracingAccelerationStructures(const Scene& scene, CommandList cmd)
 	}
 
 	scene.acceleration_structure_update_requested = false;
+	scene.blas_optimize_offset++;
 }
 
 

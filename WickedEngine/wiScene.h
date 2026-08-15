@@ -100,6 +100,7 @@ namespace wi::scene
 		wi::unordered_map<wi::ecs::Entity, wi::vector<wi::ecs::Entity>> topdown_hierarchy; // managed by BuildTopDownHierarchy() in every Update(), allows parent->children traversal
 		wi::jobsystem::context topdown_hierarchy_workload;
 		uint32_t cpu_gpu_mapped_resource_index = 0;
+		mutable uint32_t blas_optimize_offset = 0;
 
 		// AABB culling streams:
 		wi::vector<wi::primitive::AABB> aabb_objects;
