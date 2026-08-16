@@ -242,11 +242,9 @@ namespace wi::scene
 
 			wi::jobsystem::Execute(ctx, [&](wi::jobsystem::JobArgs args) {
 				// Must not keep inactive instances, so init them for safety:
-				ShaderMeshInstance inst;
-				inst.init();
 				for (uint32_t i = 0; i < instanceArraySize; ++i)
 				{
-					std::memcpy(instanceArrayMapped + i, &inst, sizeof(inst));
+					std::memcpy(instanceArrayMapped + i, &shader_mesh_instance_null, sizeof(shader_mesh_instance_null));
 				}
 			});
 		}
@@ -4419,8 +4417,7 @@ namespace wi::scene
 
 		if (impostors.GetCount() > 0)
 		{
-			ShaderMaterial material;
-			material.init();
+			ShaderMaterial material = shader_material_null;
 			material.shaderType_meshblend = 0xFFFF;
 			std::memcpy(materialArrayMapped + impostorMaterialOffset, &material, sizeof(material));
 
@@ -5132,8 +5129,7 @@ namespace wi::scene
 			size_t geometryAllocation = geometryAllocator.fetch_add(1);
 			std::memcpy(geometryArrayMapped + geometryAllocation, &geometry, sizeof(geometry));
 
-			ShaderMeshInstance inst;
-			inst.init();
+			ShaderMeshInstance inst = shader_mesh_instance_null;
 			inst.uid = entity;
 			inst.layerMask = hair.layerMask;
 			inst.emissive = wi::math::pack_half3(XMFLOAT3(1, 1, 1));
@@ -5152,10 +5148,6 @@ namespace wi::scene
 			{
 				XMStoreFloat4x4(&remapMatrix, hair.aabb.getUnormRemapMatrix());
 				inst.transform.Create(remapMatrix);
-			}
-			else
-			{
-				inst.transform.init();
 			}
 			inst.transformPrev = inst.transform;
 
@@ -5252,8 +5244,7 @@ namespace wi::scene
 			size_t geometryAllocation = geometryAllocator.fetch_add(1);
 			std::memcpy(geometryArrayMapped + geometryAllocation, &geometry, sizeof(geometry));
 
-			ShaderMeshInstance inst;
-			inst.init();
+			ShaderMeshInstance inst = shader_mesh_instance_null;
 			inst.uid = entity;
 			inst.layerMask = emitter.layerMask;
 			inst.emissive = wi::math::pack_half3(XMFLOAT3(1, 1, 1));
@@ -5431,8 +5422,7 @@ namespace wi::scene
 			rainEmitter.UpdateCPU(transform, dt);
 			rain_blocker_dummy_light.cascade_distances[0] = transform.scale_local.x;
 
-			ShaderMaterial material;
-			material.init();
+			ShaderMaterial material = shader_material_null;
 			rainMaterial.WriteShaderMaterial(&material);
 			std::memcpy(materialArrayMapped + rainMaterialOffset, &material, sizeof(material));
 
@@ -5449,8 +5439,7 @@ namespace wi::scene
 
 			std::memcpy(geometryArrayMapped + rainGeometryOffset, &geometry, sizeof(geometry));
 
-			ShaderMeshInstance inst;
-			inst.init();
+			ShaderMeshInstance inst = shader_mesh_instance_null;
 			inst.uid = 0;
 			inst.layerMask = ~0u;
 			inst.emissive = wi::math::pack_half3(XMFLOAT3(1, 1, 1));

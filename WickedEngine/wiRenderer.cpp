@@ -6698,8 +6698,7 @@ void DrawShadowmaps(
 	cam_frustum.Transform(cam_frustum, vis.camera->GetInvView());
 	XMStoreFloat4(&cam_frustum.Orientation, XMQuaternionNormalize(XMLoadFloat4(&cam_frustum.Orientation)));
 
-	CameraCB cb;
-	cb.init();
+	CameraCB cb = camera_cb_null;
 
 	const XMVECTOR EYE = vis.camera->GetEye();
 
@@ -9330,8 +9329,7 @@ void RefreshEnvProbes(const Visibility& vis, CommandList cmd)
 			tilebuffer_descriptor = device->GetDescriptorIndex(&tiledlights.entityTiles, SubresourceType::SRV);
 		}
 
-		CameraCB cb;
-		cb.init();
+		CameraCB cb = camera_cb_null;
 		for (uint32_t i = 0; i < arraysize(cameras); ++i)
 		{
 			ShaderCamera& shadercam = cb.cameras[i];
@@ -9834,8 +9832,7 @@ void RefreshEnvProbes(const Visibility& vis, CommandList cmd)
 		// Reset SkyAtmosphere SkyViewLut after usage:
 		if (rendered_anything)
 		{
-			CameraCB cb;
-			cb.init();
+			CameraCB cb = camera_cb_null;
 			cb.cameras[0].position = vis.camera->Eye;
 			device->BindDynamicConstantBuffer(cb, CBSLOT_RENDERER_CAMERA, cmd);
 
@@ -11434,8 +11431,7 @@ void BindCameraCB(
 	CommandList cmd
 )
 {
-	CameraCB cb;
-	cb.init();
+	CameraCB cb = camera_cb_null;
 	ShaderCamera& shadercam = cb.cameras[0];
 
 	shadercam.options = camera.shadercamera_options;

@@ -1577,10 +1577,17 @@ struct alignas(16) CameraCB
 			cameras[i].init();
 		}
 	}
+	static CameraCB get_null()
+	{
+		CameraCB ret;
+		ret.init();
+		return ret;
+	}
 #endif // __cplusplus
 };
 #ifdef __cplusplus
 static_assert(sizeof(CameraCB) <= 64 * 1024); // constant buffer can be max 64k sized
+inline static const CameraCB camera_cb_null = CameraCB::get_null();
 #endif // __cplusplus
 
 CONSTANTBUFFER(g_xFrame, FrameCB, CBSLOT_RENDERER_FRAME);
