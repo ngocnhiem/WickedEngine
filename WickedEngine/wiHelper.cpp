@@ -1476,18 +1476,10 @@ namespace wi::helper
 
 			wchar_t szFile[4096] = {};
 
-			OPENFILENAME ofn;
-			ZeroMemory(&ofn, sizeof(ofn));
+			OPENFILENAME ofn = {};
 			ofn.lStructSize = sizeof(ofn);
-			ofn.hwndOwner = nullptr;
 			ofn.lpstrFile = szFile;
-			// Set lpstrFile[0] to '\0' so that GetOpenFileName does not
-			// use the contents of szFile to initialize itself.
-			ofn.lpstrFile[0] = '\0';
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = NULL;
+			ofn.nMaxFile = arraysize(szFile);
 			ofn.nFilterIndex = 1;
 
 			// Slightly convoluted way to create the filter.
