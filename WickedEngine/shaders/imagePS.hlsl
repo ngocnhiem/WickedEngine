@@ -4,6 +4,8 @@ float4 main(VertextoPixel input) : SV_TARGET
 {
 	half4 color = unpack_half4(image.packed_color);
 
+	const half hdr_scaling = unpack_half2(image.hdr_scaling_aspect).x;
+
 	[branch]
 	if (image.IsFont())
 	{
@@ -11,10 +13,9 @@ float4 main(VertextoPixel input) : SV_TARGET
 		Texture2D<half4> tex = bindless_textures_half4[descriptor_index(image.texture_base_index)];
 		half value = tex.SampleLevel(sampler_linear_clamp, input.q, 0).r;
 	
-		const half3 softness_bolden_hdrscaling = unpack_half3(image.softness_bolden_hdrscaling);
-		const half softness = softness_bolden_hdrscaling.x;
-		const half bolden = softness_bolden_hdrscaling.y;
-		const half hdr_scaling = softness_bolden_hdrscaling.z;
+		const half2 softness_bolden = unpack_half2(image.angular_softness_direction);
+		const half softness = softness_bolden.x;
+		const half bolden = softness_bolden.y;
 
 		[branch]
 		if (image.flags & FONT_FLAG_SDF_RENDERING)
@@ -57,7 +58,6 @@ float4 main(VertextoPixel input) : SV_TARGET
 		// Image renderer:
 		SamplerState sam = bindless_samplers[descriptor_index(image.sampler_index)];
 
-		const half hdr_scaling = unpack_half2(image.hdr_scaling_aspect).x;
 		const half canvas_aspect = unpack_half2(image.hdr_scaling_aspect).y;
 		const half border_soften = unpack_half2(image.bordersoften_saturation).x;
 		const half saturation = unpack_half2(image.bordersoften_saturation).y;

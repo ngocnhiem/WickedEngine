@@ -111,7 +111,7 @@ namespace wi::font
 			bool start_new_word = false;
 		};
 
-		static thread_local wi::vector<FontVertex> vertexList;
+		static thread_local wi::vector<XMFLOAT4> vertexList;
 		ParseStatus ParseText(const wchar_t* text, size_t text_length, const Params& params)
 		{
 			ParseStatus status;
@@ -128,11 +128,11 @@ namespace wi::font
 				if (status.last_word_begin > 0 && params.h_wrap >= 0 && status.cursor.position.x >= params.h_wrap - 1)
 				{
 					// Word ended and wrap detected, push down last word by one line:
-					const float word_offset = vertexList[status.last_word_begin].pos.x;
+					const float word_offset = vertexList[status.last_word_begin].x;
 					for (size_t i = status.last_word_begin; i < status.quadCount * 4; ++i)
 					{
-						vertexList[i].pos.x -= word_offset;
-						vertexList[i].pos.y += linebreak_size;
+						vertexList[i].x -= word_offset;
+						vertexList[i].y += linebreak_size;
 					}
 					status.cursor.position.x -= word_offset;
 					status.cursor.position.y += linebreak_size;
@@ -202,11 +202,6 @@ namespace wi::font
 					const float top = status.cursor.position.y + glyphOffsetY;
 					const float bottom = top + glyphHeight;
 
-					vertexList[vertexID + 0].pos = float2(left, top);
-					vertexList[vertexID + 1].pos = float2(right, top);
-					vertexList[vertexID + 2].pos = float2(left, bottom);
-					vertexList[vertexID + 3].pos = float2(right, bottom);
-
 					float tc_left = glyph.tc_left;
 					float tc_right = glyph.tc_right;
 					float tc_top = glyph.tc_top;
@@ -219,10 +214,11 @@ namespace wi::font
 					{
 						std::swap(tc_top, tc_bottom);
 					}
-					vertexList[vertexID + 0].uv = float2(tc_left, tc_top);
-					vertexList[vertexID + 1].uv = float2(tc_right, tc_top);
-					vertexList[vertexID + 2].uv = float2(tc_left, tc_bottom);
-					vertexList[vertexID + 3].uv = float2(tc_right, tc_bottom);
+
+					vertexList[vertexID + 0] = float4(left, top, tc_left, tc_top);
+					vertexList[vertexID + 1] = float4(right, top, tc_right, tc_top);
+					vertexList[vertexID + 2] = float4(left, bottom, tc_left, tc_bottom);
+					vertexList[vertexID + 3] = float4(right, bottom, tc_right, tc_bottom);
 
 					int advance, lsb;
 					stbtt_GetCodepointHMetrics(&glyph.fontStyle->fontInfo, code, &advance, &lsb);
@@ -259,7 +255,7 @@ namespace wi::font
 
 		void CommitText(void* vertexList_GPU)
 		{
-			std::memcpy(vertexList_GPU, vertexList.data(), sizeof(FontVertex) * vertexList.size());
+			std::memcpy(vertexList_GPU, vertexList.data(), sizeof(XMFLOAT4) * vertexList.size());
 		}
 
 	}
@@ -560,7 +556,7 @@ namespace wi::font
 		M = M * Projection;
 
 		GraphicsDevice* device = wi::graphics::GetDevice();
-		GraphicsDevice::GPUAllocation mem = device->AllocateGPU(sizeof(FontVertex) * status.quadCount * 4, cmd);
+		GraphicsDevice::GPUAllocation mem = device->AllocateGPU(sizeof(float4) * status.quadCount * 4, cmd);
 		if (!mem.IsValid())
 			return status.cursor;
 		CommitText(mem.data);
@@ -612,8 +608,9 @@ namespace wi::font
 			image.packed_color = pack_half4(color);
 			bolden = params.shadow_bolden;
 			softness = params.shadow_softness * 0.5f;
-			image.softness_bolden_hdrscaling = pack_half3(softness, bolden, hdr_scaling);
-			device->BindDynamicConstantBuffer(image, CBSLOT_FONT, cmd);
+			image.hdr_scaling_aspect = pack_half2(hdr_scaling, 0);
+			image.angular_softness_direction = pack_half2(softness, bolden);
+			device->BindDynamicConstantBuffer(image, CBSLOT_IMAGE, cmd);
 
 			device->DrawInstanced(4, status.quadCount, 0, 0, cmd);
 		}
@@ -627,8 +624,9 @@ namespace wi::font
 		image.packed_color = pack_half4(color);
 		bolden = params.bolden;
 		softness = params.softness * 0.5f;
-		image.softness_bolden_hdrscaling = pack_half3(softness, bolden, hdr_scaling);
-		device->BindDynamicConstantBuffer(image, CBSLOT_FONT, cmd);
+		image.hdr_scaling_aspect = pack_half2(hdr_scaling, 0);
+		image.angular_softness_direction = pack_half2(softness, bolden);
+		device->BindDynamicConstantBuffer(image, CBSLOT_IMAGE, cmd);
 
 		device->DrawInstanced(4, status.quadCount, 0, 0, cmd);
 

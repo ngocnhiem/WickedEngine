@@ -17,10 +17,10 @@ VertextoPixel main(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 	{
 		// Font renderer:
 		uint vID = instanceID * 4 + vertexID;
-		FontVertex vertex = bindless_buffers[descriptor_index(image.buffer_index)].Load<FontVertex>(image.buffer_offset + vID * sizeof(FontVertex));
+		const float4 vertex = bindless_buffers[descriptor_index(image.buffer_index)].Load<float4>(image.buffer_offset + vID * sizeof(float4));
 
-		Out.pos = mul(image.transform, float4(asfloat(vertex.pos), 0, 1));
-		Out.q = vertex.uv;
+		Out.pos = mul(image.transform, float4(vertex.xy, 0, 1));
+		Out.q = vertex.zw;
 		switch (vertexID)
 		{
 			default:

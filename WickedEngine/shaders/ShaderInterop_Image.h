@@ -26,11 +26,6 @@ enum IMAGE_FLAGS
 	FONT_FLAG_OUTPUT_COLOR_SPACE_LINEAR = 1u << 18u,
 };
 
-struct FontVertex
-{
-	float2 pos;
-	float2 uv;
-};
 namespace SDF
 {
 	static const uint padding = 5;
@@ -68,9 +63,10 @@ struct alignas(16) ImageConstants
 	uint highlight_xy; // packed half2
 	uint angular_softness_direction; // packed half2
 
-	uint2 softness_bolden_hdrscaling; // packed half3
 	uint angular_softness_mad; // packed half2
 	uint padding0;
+	uint padding1;
+	uint padding2;
 
 	uint2 gradient_color; // packed half4
 	uint gradient_uv_start; // packed half2
