@@ -40,6 +40,16 @@ float4 main(PSIn input) : SV_TARGET
 
 	half4 gradient = texture_gradientmap.Sample(sampler_aniso_wrap, input.uv);
 
+	// Add some small scale detail waves to make it look less uniform:
+	const uint detail_count = 3;
+	half2 gradient_detail = 0;
+	for (uint i = 0; i < detail_count; ++i)
+	{
+		gradient_detail += texture_gradientmap.Sample(sampler_aniso_wrap, input.uv * pow(2.0, half(i + 1))).rg;
+	}
+	gradient_detail /= half(detail_count);
+	gradient.rg += gradient_detail;
+
 
 	const float g_PerlinSize = 1;
 	const float2 g_UVBase = 0;
@@ -72,16 +82,6 @@ float4 main(PSIn input) : SV_TARGET
 	{
 		gradient.rg += bindless_textures_half4[descriptor_index(camera.texture_waterriples_index)].SampleLevel(sampler_linear_clamp, ScreenCoord, 0).rg * 0.0125;
 	}
-
-	// Add some small scale detail waves to make it look less uniform:
-	const uint detail_count = 3;
-	half2 gradient_detail = 0;
-	for (uint i = 0; i < detail_count; ++i)
-	{
-		gradient_detail += texture_gradientmap.Sample(sampler_aniso_wrap, input.uv * pow(2.0, half(i + 1))).rg;
-	}
-	gradient_detail /= half(detail_count);
-	gradient.rg += gradient_detail;
 
 	const float bump_strength = 0.1;
 	
@@ -194,7 +194,7 @@ float4 main(PSIn input) : SV_TARGET
 		// FOAM:
 		float water_depth_diff = abs(compute_lineardepth(texture_depth[pixel]) - lineardepth); // Note: for the shore foam, this is more accurate than water plane distance
 		float foam_shore = saturate(exp(-water_depth_diff * 2));
-		float foam_wave = pow(saturate(gradient.a), 4) * saturate(exp(-water_depth * 0.1));
+		float foam_wave = pow(saturate(gradient.a * (1 - gradient_fade)), 4) * saturate(exp(-water_depth * 0.1));
 		float foam_combined = saturate(foam_shore + foam_wave);
 		float foam = smoothstep(0.5, 0.6, saturate(foam_combined + 0.1));
 		// The procedural noise below is multiplied by foam_combined, so it only
